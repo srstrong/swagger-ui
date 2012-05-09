@@ -18,14 +18,14 @@
   %body
 
     #header
-      %img{:alt => "Logo", :src => "stylesheets/logo.png", :style => "border: 0 none; margin-left: 15px;"}
 
       %form#api_selector
         .input
-          %span{:style => "font-family: GochiHandRegular; color: #FFFFFF; "}
-            Please Enter Your Private Key &ndash;&gt;
-          = text_field_tag :privateKey, :placeholder => "private_key", :id => 'input_privateKey'
-
+          = text_field_tag :baseUrl, :placeholder => "base_url", :id => 'input_baseUrl'
+        .input
+          = text_field_tag :apiKey, :placeholder => "api_key", :id => 'input_apiKey'
+        .input
+          %a#explore{:href => "#"} Explore
     = yield
 
     #content_message

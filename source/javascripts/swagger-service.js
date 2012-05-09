@@ -96,6 +96,7 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
   var Api = Spine.Model.setup("Api", ["baseUrl", "path", "path_json", "path_xml", "name", "description", "operations", "path_json", "path_xml"]);
   Api.include({
     init: function(atts) {
+
       if (atts) this.load(atts);
 
       if(this.path.indexOf("{format}") > 0){
@@ -128,7 +129,6 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
         this.name = this.path.substr(0, this.path.indexOf("/"));
       }
 
-
       var value = this.operations;
 
       this.operations = ApiOperation.sub();
@@ -139,7 +139,6 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
           obj.path = this.path;
           obj.path_json = this.path_json;
           obj.path_xml = this.path_xml;
-
         }
 
         this.operations.refresh(value);
@@ -264,6 +263,7 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
         var regex = new RegExp("(\\w+)://([^/]+)([^\?]*)([\?].+)?");
 
         return function (url) {
+
             var matches = url.match(regex);
             var path = (matches.length > 3 ? matches[3] : null);
             var query = (matches.length > 4 ? matches[4] : null);
@@ -463,6 +463,7 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
 	      .success(function(response) {
 		      log("Setting globalBasePath to " + response.basePath);
 		      globalBasePath = response.basePath;
+
 		      ApiResource.createAll(response.apis);
 	          controller.fetchResources(response.basePath);
 	      })
@@ -521,7 +522,10 @@ function SwaggerService(discoveryUrl, _apiKey, statusCallback) {
         }
 
         updateStatus();
-      } finally {
+      } catch (err) {
+	  log("error", err);
+      }
+	finally {
         if (this.countLoaded == ApiResource.count()) {
           // log("all models/api loaded");
           ApiResource.trigger("refresh");

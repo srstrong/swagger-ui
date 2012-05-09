@@ -35,7 +35,7 @@ body
     position: fixed
     width: 100%
     z-index: 1000
-    background-color: $color_gd_header
+    background-color: $main_color_light
     padding: 0
 
     a#logo
@@ -47,14 +47,14 @@ body
       color: white
 
     form#api_selector
-      @include float_right
+      @include no_float
+      padding: 15px
       .input
         @include float_left
         margin: 0 10px 0 0
         input
           font-size: .9em
           padding: 3px
-          margin: 14px
         input#input_baseUrl
           width: 400px
         input#input_apiKey

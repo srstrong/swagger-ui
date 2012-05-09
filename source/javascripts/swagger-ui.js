@@ -11,10 +11,14 @@ jQuery(function($) {
     init: function() {
 
       if (this.supportsLocalStorage()) {
-        var privateKey = localStorage.getItem("com.wordnik.swagger.ui.privateKey");
+        var baseUrl = localStorage.getItem("com.wordnik.swagger.ui.baseUrl");
+        var apiKey = localStorage.getItem("com.wordnik.swagger.ui.apiKey");
 
-        if (privateKey && privateKey.length > 0)
-        $("#input_privateKey").val(privateKey);
+        if (baseUrl && baseUrl.length > 0)
+        $("#input_baseUrl").val(baseUrl);
+
+        if (apiKey && apiKey.length > 0)
+        $("#input_apiKey").val(apiKey);
 
       } else {
         log("localStorage not supported, user will need to specifiy the api url");
@@ -72,19 +76,16 @@ jQuery(function($) {
     },
 
     showApi: function() {
-      var baseUrl = location.protocol + "//" + location.host + location.pathname;
-      if(location.hostname == "localhost"){
-        baseUrl = "https://dev-api.groupdocs.com/v2.0/spec";
-      }
-      var apiKey = "";
-      var privateKey = jQuery.trim($("#input_privateKey").val());
+      var baseUrl = jQuery.trim($("#input_baseUrl").val());
+      var apiKey = jQuery.trim($("#input_apiKey").val());
       if (baseUrl.length == 0) {
         $("#input_baseUrl").wiggle();
       } else {
+
         if (this.supportsLocalStorage()) {
-          localStorage.setItem("com.wordnik.swagger.ui.privateKey", privateKey);
           localStorage.setItem("com.wordnik.swagger.ui.apiKey", apiKey);
           localStorage.setItem("com.wordnik.swagger.ui.baseUrl", baseUrl);
+
         }
         var resourceListController = ResourceListController.init({
           baseUrl: baseUrl,
@@ -132,7 +133,9 @@ jQuery(function($) {
       $("#resources").html("");
 
       // create and initialize SwaggerService
-      var swaggerService = new SwaggerService(this.baseUrl, this.apiKey,
+//      var swaggerService = new SwaggerService("http://localhost:8002", this.apiKey,
+//      var swaggerService = new SwaggerService("http://localhost:4567/spec", this.apiKey,
+     var swaggerService = new SwaggerService(this.baseUrl, this.apiKey,
       function(msg) {
         if (msg)
         messageController.showMessage(msg);
@@ -513,12 +516,12 @@ jQuery(function($) {
     },
 
     submitOperationSigned: function() {
-      var privateKey = jQuery.trim($("#input_privateKey").val());
-      if(privateKey.length == 0){
-          $("#input_privateKey").wiggle();
+      var apiKey = jQuery.trim($("#input_apiKey").val());
+      if(apiKey.length == 0){
+          $("#input_apiKey").wiggle();
           return;
       } else if (apiSelectionController.supportsLocalStorage()) {
-          localStorage.setItem("com.wordnik.swagger.ui.privateKey", privateKey);
+          localStorage.setItem("com.wordnik.swagger.ui.apiKey", apiKey);
       }
 
       var form = $(this.elementScope + "_form");
@@ -545,7 +548,7 @@ jQuery(function($) {
       if (error_free) {
         var formData = form.find("td>input, td>select").serializeArray();
         console.log(formData);
-        var invocationUrl = this.operation.invocationUrlSigned(formData, privateKey);
+        var invocationUrl = this.operation.invocationUrlSigned(formData, apiKey);
         if(invocationUrl){
         	var ajaxArgs = {
                 type: this.operation.httpMethod,

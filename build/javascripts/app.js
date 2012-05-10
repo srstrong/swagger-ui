@@ -2854,3 +2854,355 @@ arguments),this._chain)}});j.prototype.chain=function(){this._chain=!0;return th
   Spine.App.extend(Events);
   Controller.fn.App = Spine.App;
 })();
+/* A JavaScript implementation of the SHA family of hashes, as defined in FIPS
+ * PUB 180-2 as well as the corresponding HMAC implementation as defined in
+ * FIPS PUB 198a
+ *
+ * Version 1.3 Copyright Brian Turek 2008-2010
+ * Distributed under the BSD License
+ * See http://jssha.sourceforge.net/ for more information
+ *
+ * Several functions taken from Paul Johnson
+ */
+
+(function(){var charSize=8,b64pad="",hexCase=0,str2binb=function(a){var b=[],mask=(1<<charSize)-1,length=a.length*charSize,i;for(i=0;i<length;i+=charSize){b[i>>5]|=(a.charCodeAt(i/charSize)&mask)<<(32-charSize-(i%32))}return b},hex2binb=function(a){var b=[],length=a.length,i,num;for(i=0;i<length;i+=2){num=parseInt(a.substr(i,2),16);if(!isNaN(num)){b[i>>3]|=num<<(24-(4*(i%8)))}else{return"INVALID HEX STRING"}}return b},binb2hex=function(a){var b=(hexCase)?"0123456789ABCDEF":"0123456789abcdef",str="",length=a.length*4,i,srcByte;for(i=0;i<length;i+=1){srcByte=a[i>>2]>>((3-(i%4))*8);str+=b.charAt((srcByte>>4)&0xF)+b.charAt(srcByte&0xF)}return str},binb2b64=function(a){var b="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+"0123456789+/",str="",length=a.length*4,i,j,triplet;for(i=0;i<length;i+=3){triplet=(((a[i>>2]>>8*(3-i%4))&0xFF)<<16)|(((a[i+1>>2]>>8*(3-(i+1)%4))&0xFF)<<8)|((a[i+2>>2]>>8*(3-(i+2)%4))&0xFF);for(j=0;j<4;j+=1){if(i*8+j*6<=a.length*32){str+=b.charAt((triplet>>6*(3-j))&0x3F)}else{str+=b64pad}}}return str},rotl=function(x,n){return(x<<n)|(x>>>(32-n))},parity=function(x,y,z){return x^y^z},ch=function(x,y,z){return(x&y)^(~x&z)},maj=function(x,y,z){return(x&y)^(x&z)^(y&z)},safeAdd_2=function(x,y){var a=(x&0xFFFF)+(y&0xFFFF),msw=(x>>>16)+(y>>>16)+(a>>>16);return((msw&0xFFFF)<<16)|(a&0xFFFF)},safeAdd_5=function(a,b,c,d,e){var f=(a&0xFFFF)+(b&0xFFFF)+(c&0xFFFF)+(d&0xFFFF)+(e&0xFFFF),msw=(a>>>16)+(b>>>16)+(c>>>16)+(d>>>16)+(e>>>16)+(f>>>16);return((msw&0xFFFF)<<16)|(f&0xFFFF)},coreSHA1=function(f,g){var W=[],a,b,c,d,e,T,i,t,appendedMessageLength,H=[0x67452301,0xefcdab89,0x98badcfe,0x10325476,0xc3d2e1f0],K=[0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x5a827999,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x6ed9eba1,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0x8f1bbcdc,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6,0xca62c1d6];f[g>>5]|=0x80<<(24-(g%32));f[(((g+65)>>9)<<4)+15]=g;appendedMessageLength=f.length;for(i=0;i<appendedMessageLength;i+=16){a=H[0];b=H[1];c=H[2];d=H[3];e=H[4];for(t=0;t<80;t+=1){if(t<16){W[t]=f[t+i]}else{W[t]=rotl(W[t-3]^W[t-8]^W[t-14]^W[t-16],1)}if(t<20){T=safeAdd_5(rotl(a,5),ch(b,c,d),e,K[t],W[t])}else if(t<40){T=safeAdd_5(rotl(a,5),parity(b,c,d),e,K[t],W[t])}else if(t<60){T=safeAdd_5(rotl(a,5),maj(b,c,d),e,K[t],W[t])}else{T=safeAdd_5(rotl(a,5),parity(b,c,d),e,K[t],W[t])}e=d;d=c;c=rotl(b,30);b=a;a=T}H[0]=safeAdd_2(a,H[0]);H[1]=safeAdd_2(b,H[1]);H[2]=safeAdd_2(c,H[2]);H[3]=safeAdd_2(d,H[3]);H[4]=safeAdd_2(e,H[4])}return H},jsSHA=function(a,b){this.sha1=null;this.strBinLen=null;this.strToHash=null;if("HEX"===b){if(0!==(a.length%2)){return"TEXT MUST BE IN BYTE INCREMENTS"}this.strBinLen=a.length*4;this.strToHash=hex2binb(a)}else if(("ASCII"===b)||('undefined'===typeof(b))){this.strBinLen=a.length*charSize;this.strToHash=str2binb(a)}else{return"UNKNOWN TEXT INPUT TYPE"}};jsSHA.prototype={getHash:function(a){var b=null,message=this.strToHash.slice();switch(a){case"HEX":b=binb2hex;break;case"B64":b=binb2b64;break;default:return"FORMAT NOT RECOGNIZED"}if(null===this.sha1){this.sha1=coreSHA1(message,this.strBinLen)}return b(this.sha1)},getHMAC:function(a,b,c){var d,keyToUse,i,retVal,keyBinLen,keyWithIPad=[],keyWithOPad=[];switch(c){case"HEX":d=binb2hex;break;case"B64":d=binb2b64;break;default:return"FORMAT NOT RECOGNIZED"}if("HEX"===b){if(0!==(a.length%2)){return"KEY MUST BE IN BYTE INCREMENTS"}keyToUse=hex2binb(a);keyBinLen=a.length*4}else if("ASCII"===b){keyToUse=str2binb(a);keyBinLen=a.length*charSize}else{return"UNKNOWN KEY INPUT TYPE"}if(64<(keyBinLen/8)){keyToUse=coreSHA1(keyToUse,keyBinLen);keyToUse[15]&=0xFFFFFF00}else if(64>(keyBinLen/8)){keyToUse[15]&=0xFFFFFF00}for(i=0;i<=15;i+=1){keyWithIPad[i]=keyToUse[i]^0x36363636;keyWithOPad[i]=keyToUse[i]^0x5C5C5C5C}retVal=coreSHA1(keyWithIPad.concat(this.strToHash),512+this.strBinLen);retVal=coreSHA1(keyWithOPad.concat(retVal),672);return(d(retVal))}};window.jsSHA=jsSHA}());
+
+/**
+ * Copyright (c) 2010 Maxim Vasiliev
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @author Maxim Vasiliev
+ * Date: 09.09.2010
+ * Time: 19:02:33
+ */
+
+
+
+var form2js = (function()
+{
+	"use strict";
+
+	/**
+	 * Returns form values represented as Javascript object
+	 * "name" attribute defines structure of resulting object
+	 *
+	 * @param rootNode {Element|String} root form element (or it's id) or array of root elements
+	 * @param delimiter {String} structure parts delimiter defaults to '.'
+	 * @param skipEmpty {Boolean} should skip empty text values, defaults to true
+	 * @param nodeCallback {Function} custom function to get node value
+	 * @param useIdIfEmptyName {Boolean} if true value of id attribute of field will be used if name of field is empty
+	 */
+	function form2js(rootNode, delimiter, skipEmpty, nodeCallback, useIdIfEmptyName)
+	{
+		if (typeof skipEmpty == 'undefined' || skipEmpty == null) skipEmpty = true;
+		if (typeof delimiter == 'undefined' || delimiter == null) delimiter = '.';
+		if (arguments.length < 5) useIdIfEmptyName = false;
+
+		rootNode = typeof rootNode == 'string' ? document.getElementById(rootNode) : rootNode;
+
+		var formValues = [],
+			currNode,
+			i = 0;
+
+		/* If rootNode is array - combine values */
+		if (rootNode.constructor == Array || (typeof NodeList != "undefined" && rootNode.constructor == NodeList))
+		{
+			while(currNode = rootNode[i++])
+			{
+				formValues = formValues.concat(getFormValues(currNode, nodeCallback, useIdIfEmptyName));
+			}
+		}
+		else
+		{
+			formValues = getFormValues(rootNode, nodeCallback, useIdIfEmptyName);
+		}
+
+		return processNameValues(formValues, skipEmpty, delimiter);
+	}
+
+	/**
+	 * Processes collection of { name: 'name', value: 'value' } objects.
+	 * @param nameValues
+	 * @param skipEmpty if true skips elements with value == '' or value == null
+	 * @param delimiter
+	 */
+	function processNameValues(nameValues, skipEmpty, delimiter)
+	{
+		var result = {},
+			arrays = {},
+			i, j, k, l,
+			value,
+			nameParts,
+			currResult,
+			arrNameFull,
+			arrName,
+			arrIdx,
+			namePart,
+			name,
+			_nameParts;
+
+		for (i = 0; i < nameValues.length; i++)
+		{
+			value = nameValues[i].value;
+
+			if (skipEmpty && (value === '' || value === null)) continue;
+
+			name = nameValues[i].name;
+			_nameParts = name.split(delimiter);
+			nameParts = [];
+			currResult = result;
+			arrNameFull = '';
+
+			for(j = 0; j < _nameParts.length; j++)
+			{
+				namePart = _nameParts[j].split('][');
+				if (namePart.length > 1)
+				{
+					for(k = 0; k < namePart.length; k++)
+					{
+						if (k == 0)
+						{
+							namePart[k] = namePart[k] + ']';
+						}
+						else if (k == namePart.length - 1)
+						{
+							namePart[k] = '[' + namePart[k];
+						}
+						else
+						{
+							namePart[k] = '[' + namePart[k] + ']';
+						}
+
+						arrIdx = namePart[k].match(/([a-z_]+)?\[([a-z_][a-z0-9_]+?)\]/i);
+						if (arrIdx)
+						{
+							for(l = 1; l < arrIdx.length; l++)
+							{
+								if (arrIdx[l]) nameParts.push(arrIdx[l]);
+							}
+						}
+						else{
+							nameParts.push(namePart[k]);
+						}
+					}
+				}
+				else
+					nameParts = nameParts.concat(namePart);
+			}
+
+			for (j = 0; j < nameParts.length; j++)
+			{
+				namePart = nameParts[j];
+
+				if (namePart.indexOf('[]') > -1 && j == nameParts.length - 1)
+				{
+					arrName = namePart.substr(0, namePart.indexOf('['));
+					arrNameFull += arrName;
+
+					if (!currResult[arrName]) currResult[arrName] = [];
+					currResult[arrName].push(value);
+				}
+				else if (namePart.indexOf('[') > -1)
+				{
+					arrName = namePart.substr(0, namePart.indexOf('['));
+					arrIdx = namePart.replace(/(^([a-z_]+)?\[)|(\]$)/gi, '');
+
+					/* Unique array name */
+					arrNameFull += '_' + arrName + '_' + arrIdx;
+
+					/*
+					 * Because arrIdx in field name can be not zero-based and step can be
+					 * other than 1, we can't use them in target array directly.
+					 * Instead we're making a hash where key is arrIdx and value is a reference to
+					 * added array element
+					 */
+
+					if (!arrays[arrNameFull]) arrays[arrNameFull] = {};
+					if (arrName != '' && !currResult[arrName]) currResult[arrName] = [];
+
+					if (j == nameParts.length - 1)
+					{
+						if (arrName == '')
+						{
+							currResult.push(value);
+							arrays[arrNameFull][arrIdx] = currResult[currResult.length - 1];
+						}
+						else
+						{
+							currResult[arrName].push(value);
+							arrays[arrNameFull][arrIdx] = currResult[arrName][currResult[arrName].length - 1];
+						}
+					}
+					else
+					{
+						if (!arrays[arrNameFull][arrIdx])
+						{
+							if ((/^[a-z_]+\[?/i).test(nameParts[j+1])) currResult[arrName].push({});
+							else currResult[arrName].push([]);
+
+							arrays[arrNameFull][arrIdx] = currResult[arrName][currResult[arrName].length - 1];
+						}
+					}
+
+					currResult = arrays[arrNameFull][arrIdx];
+				}
+				else
+				{
+					arrNameFull += namePart;
+
+					if (j < nameParts.length - 1) /* Not the last part of name - means object */
+					{
+						if (!currResult[namePart]) currResult[namePart] = {};
+						currResult = currResult[namePart];
+					}
+					else
+					{
+						currResult[namePart] = value;
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+    function getFormValues(rootNode, nodeCallback, useIdIfEmptyName)
+    {
+        var result = extractNodeValues(rootNode, nodeCallback, useIdIfEmptyName);
+        return result.length > 0 ? result : getSubFormValues(rootNode, nodeCallback, useIdIfEmptyName);
+    }
+
+    function getSubFormValues(rootNode, nodeCallback, useIdIfEmptyName)
+	{
+		var result = [],
+			currentNode = rootNode.firstChild;
+		
+		while (currentNode)
+		{
+			result = result.concat(extractNodeValues(currentNode, nodeCallback, useIdIfEmptyName));
+			currentNode = currentNode.nextSibling;
+		}
+
+		return result;
+	}
+
+    function extractNodeValues(node, nodeCallback, useIdIfEmptyName) {
+        var callbackResult, fieldValue, result, fieldName = getFieldName(node, useIdIfEmptyName);
+
+        callbackResult = nodeCallback && nodeCallback(node);
+
+        if (callbackResult && callbackResult.name) {
+            result = [callbackResult];
+        }
+        else if (fieldName != '' && node.nodeName.match(/INPUT|TEXTAREA/i)) {
+            fieldValue = getFieldValue(node);
+			result = [ { name: fieldName, value: fieldValue} ];
+        }
+        else if (fieldName != '' && node.nodeName.match(/SELECT/i)) {
+	        fieldValue = getFieldValue(node);
+	        result = [ { name: fieldName.replace(/\[\]$/, ''), value: fieldValue } ];
+        }
+        else {
+            result = getSubFormValues(node, nodeCallback, useIdIfEmptyName);
+        }
+
+        return result;
+    }
+
+	function getFieldName(node, useIdIfEmptyName)
+	{
+		if (node.name && node.name != '') return node.name;
+		else if (useIdIfEmptyName && node.id && node.id != '') return node.id;
+		else return '';
+	}
+
+
+	function getFieldValue(fieldNode)
+	{
+		if (fieldNode.disabled) return null;
+		
+		switch (fieldNode.nodeName) {
+			case 'INPUT':
+			case 'TEXTAREA':
+				switch (fieldNode.type.toLowerCase()) {
+					case 'radio':
+					case 'checkbox':
+                        if (fieldNode.checked && fieldNode.value === "true") return true;
+                        if (!fieldNode.checked && fieldNode.value === "true") return false;
+						if (fieldNode.checked) return fieldNode.value;
+						break;
+
+					case 'button':
+					case 'reset':
+					case 'submit':
+					case 'image':
+						return '';
+						break;
+
+					default:
+						return fieldNode.value;
+						break;
+				}
+				break;
+
+			case 'SELECT':
+				return getSelectedOptionValue(fieldNode);
+				break;
+
+			default:
+				break;
+		}
+
+		return null;
+	}
+
+	function getSelectedOptionValue(selectNode)
+	{
+		var multiple = selectNode.multiple,
+			result = [],
+			options,
+			i, l;
+
+		if (!multiple) return selectNode.value;
+
+		for (options = selectNode.getElementsByTagName("option"), i = 0, l = options.length; i < l; i++)
+		{
+			if (options[i].selected) result.push(options[i].value);
+		}
+
+		return result;
+	}
+
+	return form2js;
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
